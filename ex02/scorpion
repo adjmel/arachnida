@@ -1,0 +1,99 @@
+#!/usr/bin/env python
+
+from PIL import Image, ExifTags, UnidentifiedImageError
+import argparse
+from sys import argv
+from colorama import Fore, init
+
+init(autoreset=True)
+print("\n")
+print(Fore.GREEN + "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡀⣴⣶⣶⣶⡦⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀")
+print(Fore.GREEN + "⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣿⣧⣝⠛⠛⠋⢾⣿⣦⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀")
+print(Fore.GREEN + "⠀⠀⠀⠀⠀⠀⠀⠀⣠⡙⠿⡟⠋⢀⣀⣀⣌⣽⣯⡷⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀")
+print(Fore.GREEN + "⠀⠀⠀⠀⠀⠀⠀⠀⣿⣿⣿⠁⠐⠉⠈⢻⣷⡻⣿⠇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀")
+print(Fore.GREEN + "⠀⠀⠀⠀⠀⠀⠀⠀⣩⣶⣧⡀⠀⠀⢀⣸⣿⠿⢛⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀")
+print(Fore.GREEN + "⠀⠀⠀⠀⠀⠀⠀⠀⣿⣯⣷⣶⣦⣠⡾⢡⣾⢿⡿⣿⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀")
+print(Fore.GREEN + "⠀⠀⠀⢀⣠⡿⠻⣆⣘⢸⣿⣻⣾⣿⡷⣛⠵⢟⣱⡾⣻⣷⣿⢶⣤⣴⣤⠀⠀⠀")
+print(Fore.GREEN + "⠀⠀⣸⠟⣡⣤⣤⣬⣿⣣⣅⣿⡿⣷⣿⣿⣿⣞⠋⣐⣻⠏⣜⠛⢿⣿⣽⣷⣄⠀")
+print(Fore.GREEN + "⠀⢀⡇⢐⣿⢁⡴⠽⣷⣾⡿⠻⣷⣹⡛⠿⠿⣭⣜⡛⠃⠀⠹⠤⠀⠘⣿⣿⣿⣷")
+print(Fore.GREEN + "⠐⠉⠀⠈⣿⢸⣇⢰⡾⠿⠿⠛⠛⠋⡥⢾⠃⣍⠉⠿⠀⠀⠀⠀⣰⣿⠿⠟⢛⡋")
+print(Fore.GREEN + "⠀⠀⠀⠀⣺⢘⡏⢸⠟⠀⢐⣭⢻⠿⣿⠏⠁⠈⠀⠀⠀⠀⠀⠀⠿⠋⠀⢀⣾⠇")
+print(Fore.GREEN + "⠀⠀⠀⠈⠁⠀⣹⠹⣆⢠⣿⣿⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠠⠟⠁⠀")
+print(Fore.GREEN + "⠀⠀⠀⠀⠀⠘⠁⠀⡾⠸⣿⣟⣿⣷⣶⣶⣤⣀⣀⣀⣀⣀⠀⠀⠀⠀⠀⠀⠀⠀")
+print(Fore.GREEN + "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢻⢸⣿⣿⣿⣿⡿⠟⠿⠛⠟⠉⠃⠀⠀⠀⠀⠀⠀⠀")
+print(Fore.GREEN + "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⠛⠛⠉⠺⠷⢦⠶⠷⠊⠀⠀⠀⠀⠀⠀⠀⠀")
+print(Fore.GREEN + "                          _             ")
+print(Fore.GREEN + "                         (_)            ")
+print(Fore.GREEN + " ___  ___ ___  _ __ _ __  _  ___  _ __  ")
+print(Fore.GREEN + "/ __|/ __/ _ \\| '__| '_ \\| |/ _ \\| '_ \\ ")
+print(Fore.GREEN + "\\__ \\ (_| (_) | |  | |_) | | (_) | | | |")
+print(Fore.GREEN + "|___/\\___\\___/|_|  | .__/|_|\\___/|_| |_|")
+print(Fore.GREEN + "                   | |                  ")
+print(Fore.GREEN + "                   |_|                  ")
+print("\n")
+
+def extract_other_type(image):
+    exif_data = {
+        "Format": image.format,
+        "Mode": image.mode,
+        "Size": image.size,
+        "Info": image.info
+    }
+    if image.format == "GIF":
+        exif_data["Is Animated"] = getattr(image, "is_animated", False)
+        exif_data["Frames"] = getattr(image, "n_frames", 1)
+    return exif_data
+
+
+#ouverture de l'image
+def extract_exif(image_path):
+    try:
+        image = Image.open(image_path)
+        if image.format == "GIF":
+            return extract_other_type(image)
+        if image.format == "BMP":
+            return extract_other_type(image)
+        else:
+            exif_data = image._getexif()
+            if not exif_data:
+                return "No EXIF ​​data found."
+            #creation du dictionnaire
+            exif_info = {}
+            for tag, value in exif_data.items():
+                tag_name = ExifTags.TAGS.get(tag, tag)
+                exif_info[tag_name] = value
+            return exif_info
+    except FileNotFoundError:
+        return "Error: The specified file was not found."
+    except Exception as e:
+        return f"Unexpected error : {str(e)}"
+
+
+def main():
+    #parsing
+    if len(argv) < 2:
+        print("Provide at least 1 image file as a parameter")
+        exit(1)
+
+    # Analyseur d'arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument("file", nargs='+', help="Path of files to analyze FILE1 [FILE2 ...]")
+    args = parser.parse_args()
+    image_path = args.file
+
+    #extraction
+    for image_path in args.file:
+        print(Fore.GREEN + f"Analyse du fichier : {image_path}")
+        exif_info = extract_exif(image_path)
+
+        #affichage
+        if isinstance(exif_info, str):
+            print(exif_info)
+        else:
+            for key, value in exif_info.items():
+                print(f"{key}: {value}")
+        print("\n")
+
+
+if __name__ == "__main__":
+    main()

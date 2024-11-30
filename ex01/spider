@@ -1,0 +1,124 @@
+#!/usr/bin/env python
+
+import requests
+import os
+import argparse
+from bs4 import BeautifulSoup
+from urllib.parse import urljoin, urlparse
+from colorama import Fore, init
+
+# Initialise librairie de couleur colorama en fond vert puis print spider
+init(autoreset=True)
+def print_spider():
+    print(Fore.GREEN + "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⣴⡞⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀")
+    print(Fore.GREEN + "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⣞⣥⠞⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀")
+    print(Fore.GREEN + "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⡞⢉⡟⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀")
+    print(Fore.GREEN + "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣤⣒⣉⠐⡶⠲⢤⡀⠀⠀⠀⠀⠀⠀⡞⢀⡾⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀")
+    print(Fore.GREEN + "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠉⠉⠛⢶⣄⣈⣳⣄⡀⠀⠀⠀⢠⠧⢾⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀")
+    print(Fore.GREEN + "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⢷⡀⠑⡄⠀⠀⠀⡏⢀⡾⠀⠀⠀⣀⣤⠤⠤⠤⢄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀")
+    print(Fore.GREEN + "⠀⠀⠀⠀⣠⣴⣎⣉⠐⢶⠦⠤⣀⠀⠀⠀⠀⠀⠀⠀⠹⣦⠼⣆⠀⢰⠓⢺⡇⣠⡴⠋⠁⠀⠀⠀⠀⠀⠙⡆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀")
+    print(Fore.GREEN + "⠀⠀⠀⠈⠋⠁⠀⠉⠙⠛⠶⣤⣀⢙⡟⢦⡀⠀⠀⠀⠀⢸⡀⠸⡄⡆⠀⣿⣴⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⡿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀")
+    print(Fore.GREEN + "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠻⣥⣄⡼⠛⢢⡀⠀⠀⢳⣀⣇⣇⢀⡟⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀")
+    print(Fore.GREEN + "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⠦⣄⡙⢢⣀⢸⢋⣉⣿⣽⠁⠀⠀⠀⠀⠀⠀⠀⠀⣠⡞⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀")
+    print(Fore.GREEN + "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢻⣁⣨⠟⠉⠁⠀⠀⢣⡀⠀⠀⠀⠀⠀⣠⣴⣋⠤⠴⡶⠤⠔⠒⠲⣤⣀⠀⠀⠀⠀")
+    print(Fore.GREEN + "⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⡤⠤⢤⡔⠊⠉⠉⠉⣺⠉⡽⠁⠀⠀⠀⠀⠀⠀⠉⡶⢶⡶⠒⠋⣿⣉⣀⣀⡴⠷⠶⠶⠤⠖⠻⢦⣉⣐⣄⠀")
+    print(Fore.GREEN + "⠀⠀⠀⠀⠀⣠⠴⠒⠋⠉⣧⣤⠴⠓⠒⠒⠒⠛⢙⡿⠀⣤⡀⠀⠀⠀⠀⠀⢀⠽⣶⣗⣚⣉⠉⠉⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀")
+    print(Fore.GREEN + "⠀⠀⡤⠚⢉⣹⠶⠒⠋⠉⠁⠀⠀⠀⠀⠀⡠⢂⡽⣧⠸⠍⠀⠀⠀⠀⠀⣰⡞⣶⣿⣤⣄⣹⡉⠉⠉⠑⣶⢄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀")
+    print(Fore.GREEN + "⢀⣾⡤⠚⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢰⣷⠋⠀⠹⣇⣀⢶⣾⣧⣴⠋⣹⣿⣏⠙⢄⠀⠈⠉⠉⠛⠚⠳⢦⣈⣑⣦⠀⠀⠀⠀⠀⠀⠀")
+    print(Fore.GREEN + "⠈⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⠃⠀⠀⠀⠈⣹⢟⡿⠃⠙⣏⠉⢳⡹⣦⣈⣧⠀⠀⠀⠀⠀⠀⠀⠈⢷⡄⢣⠀⠀⠀⠀⠀⠀")
+    print(Fore.GREEN + "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣴⣾⠿⠋⠀⠀⠀⠹⣆⣠⡇⢻⡇⢻⡀⠀⠀⠀⠀⠀⠀⠀⠀⠹⣿⠄⠀⠀⠀⠀⠀")
+    print(Fore.GREEN + "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠀⠀⠀⠀⠀⠀⠀⣿⠁⢣⢸⣇⣠⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠛⠀⠀⠀⠀⠀⠀")
+    print(Fore.GREEN + "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⣀⣈⡆⣿⠀⣇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀")
+    print(Fore.GREEN + "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⠁⡟⠀⢸⣧⡼⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀")
+    print(Fore.GREEN + "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢿⠀⢣⠀⢺⠀⡿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀")
+    print(Fore.GREEN + "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⡤⡼⠀⣾⡖⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀")
+    print(Fore.GREEN + "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢿⠀⣿⠀⠛⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀")
+    print(Fore.GREEN + "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣠⠏⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀")
+    print(Fore.GREEN + "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣾⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀")
+print_spider()
+print("\n")
+
+
+# Header requete pour ne pas passer pour un bot
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+}
+
+
+# Analyseur d'arguments de commande
+parser = argparse.ArgumentParser(description="Downloads images from a URL and saves them to a specified directory")
+parser.add_argument("-p", type=str, help="Option -p [PATH] : indicates the path where the downloaded files will be saved. If not specified, ./data/ will be used.", default="./data/")
+parser.add_argument("url", type=str, help="The URL of the website")
+parser.add_argument("-r", action="store_true", help="Downloads images recursively")
+parser.add_argument("-l", type=int, default=5, help="Specifies the maximum depth of recursive download (default 5).")
+args = parser.parse_args()
+save_path = args.p
+url = args.url
+recursive = args.r
+max_depth = args.l
+# Creation des repertoires
+if not os.path.exists(save_path):
+    os.makedirs(save_path)
+print(f"The images will be uploaded to the directory : {save_path}")
+print(f"URL : {url}")
+if recursive == True:
+    print(f"Maximum depth level of the recursive download : {max_depth}")
+print("\n")
+
+#trouve le type d'img et enregistre le fichier
+def findType_and_saveFile(img_url, depth, i):
+    img_response = requests.get(img_url, headers=headers)
+    img_response.raise_for_status()
+    content_type = img_response.headers.get('Content-Type', '')
+    if 'image/jpeg' in content_type:
+        img_extension = 'jpg'
+    elif 'image/png' in content_type:
+        img_extension = 'png'
+    elif 'image/gif' in content_type:
+        img_extension = 'gif'
+    elif 'image/bmp' in content_type:
+        img_extension = 'bmp'
+    else:
+        print(f"Unsupported image format for {img_url}")
+        return
+    img_filename = f'image_{depth}_{i}.{img_extension}'
+    img_path = os.path.join(save_path, img_filename)
+    with open(img_path, 'wb') as file:
+        file.write(img_response.content)
+    print(f"Image {i} saved as {img_path}")
+
+
+#request_search_download
+def request_search_download(url, save_path, depth, max_depth):
+    try:
+        if depth > max_depth:
+            return
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+        soup = BeautifulSoup(response.text, 'html.parser')
+        img_tags = soup.find_all('img') # Trouve toutes les images dans la page
+        for i, img in enumerate(img_tags):
+            img_url = img.get('src')
+            if img_url:
+                img_url = urljoin(url, img_url)
+                try:
+                   findType_and_saveFile(img_url, depth, i)
+                except requests.exceptions.RequestException as e:
+                    print(f"Error while downloading image {i}: {e}")
+        if recursive and depth < max_depth:
+            links = soup.find_all('a', href=True)
+            for link in links:
+                link_url = link['href']
+                full_link_url = urljoin(url, link_url)
+                if urlparse(full_link_url).netloc == urlparse(url).netloc:
+                    request_search_download(full_link_url, save_path, depth + 1, max_depth)
+    except KeyboardInterrupt:
+        print("\nProcess interrupted by the user. Exiting safely ✅")
+        exit(1)
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+        exit(1)
+# Lance le téléchargement des images en recursif
+request_search_download(url, save_path, 1, max_depth)
+print("Download complete ✅")
+
